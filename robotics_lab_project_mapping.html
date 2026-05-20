@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robotics Lab — Project Readiness Map</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f2;color:#1a1a18;padding:24px 16px;min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto}
+  .header{margin-bottom:1.5rem}
+  .section-title{font-size:22px;font-weight:500;color:#1a1a18;margin-bottom:4px}
+  .sub{font-size:13px;color:#6b6a63;margin-bottom:1.5rem}
+  .tab-row{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+  .tab{padding:6px 14px;border-radius:20px;border:0.5px solid #ccc;background:#ebebeb;font-size:13px;cursor:pointer;color:#6b6a63;transition:all .15s;font-family:inherit}
+  .tab.active{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}
+  .tab:hover:not(.active){background:#e0e0dc;color:#444}
+  .panel{display:none}.panel.active{display:block}
+
+  /* Inventory */
+  .legend-row{display:flex;gap:16px;margin-bottom:1rem;flex-wrap:wrap}
+  .leg{display:flex;align-items:center;gap:6px;font-size:12px;color:#6b6a63}
+  .leg-dot{width:10px;height:10px;border-radius:50%}
+  .inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+  .inv-card{background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+  .inv-card.ok{border-left:3px solid #1D9E75}
+  .inv-card.missing{border-left:3px solid #E24B4A;opacity:.7}
+  .inv-card.partial{border-left:3px solid #BA7517}
+  .inv-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+  .dot-ok{background:#1D9E75}.dot-miss{background:#E24B4A}.dot-part{background:#BA7517}
+  .inv-name{font-size:13px;font-weight:500;color:#1a1a18;line-height:1.4}
+  .inv-qty{font-size:12px;color:#6b6a63;margin-top:2px}
+  .inv-status{font-size:11px;margin-top:3px;font-weight:500}
+  .s-ok{color:#1D9E75}.s-miss{color:#E24B4A}.s-part{color:#BA7517}
+
+  /* Projects */
+  .phase-block{margin-bottom:1.5rem}
+  .phase-label{font-size:12px;font-weight:500;padding:3px 10px;border-radius:12px;display:inline-block;margin-bottom:10px}
+  .ph-begin{background:#E1F5EE;color:#0F6E56}
+  .ph-inter{background:#E6F1FB;color:#185FA5}
+  .ph-adv{background:#FAEEDA;color:#854F0B}
+  .ph-bonus{background:#EEEDFE;color:#534AB7}
+  .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+  .proj-card{background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:12px 14px;cursor:pointer;transition:border-color .15s}
+  .proj-card:hover{border-color:#999}
+  .proj-card.ready{border-left:3px solid #1D9E75}
+  .proj-card.partial{border-left:3px solid #BA7517}
+  .proj-card.blocked{border-left:3px solid #E24B4A;opacity:.65}
+  .proj-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+  .proj-name{font-size:13px;font-weight:500;color:#1a1a18}
+  .badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:8px;white-space:nowrap;flex-shrink:0}
+  .b-go{background:#E1F5EE;color:#0F6E56}
+  .b-partial{background:#FAEEDA;color:#854F0B}
+  .b-blocked{background:#FCEBEB;color:#A32D2D}
+  .kits-used{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .kit-tag{font-size:10px;padding:2px 7px;border-radius:6px;background:#f1efe8;color:#6b6a63;border:0.5px solid #ddd}
+  .proj-note{font-size:11px;color:#6b6a63;margin-top:5px;line-height:1.5}
+
+  /* Detail panel */
+  .detail-area{background:#f1efe8;border-radius:10px;padding:14px 16px;margin-top:12px;display:none}
+  .detail-area.open{display:block}
+  .detail-close{float:right;background:none;border:none;cursor:pointer;font-size:16px;color:#6b6a63;font-family:inherit}
+  .detail-title{font-size:15px;font-weight:500;margin-bottom:10px;color:#1a1a18}
+  .detail-row{font-size:13px;color:#6b6a63;margin-bottom:6px;line-height:1.6}
+  .detail-row strong{font-weight:500;color:#1a1a18}
+
+  /* Roadmap */
+  .roadmap{border:0.5px solid #ddd;border-radius:10px;overflow:hidden;background:#fff}
+  .rm-row{display:flex;gap:0;align-items:stretch;border-bottom:0.5px solid #eee}
+  .rm-row:last-child{border-bottom:none}
+  .rm-phase{width:130px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:12px 14px;border-right:1px solid #eee;background:#fafaf8}
+  .rm-phase-name{font-size:13px;font-weight:500;color:#1a1a18}
+  .rm-phase-dur{font-size:11px;color:#6b6a63;margin-top:2px}
+  .rm-skills{flex:1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 14px}
+  .skill-pill{font-size:12px;padding:3px 9px;border-radius:20px;border:0.5px solid #ddd;background:#f1efe8;color:#6b6a63}
+  .skill-pill.highlight{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;font-weight:500}
+
+  /* Summary */
+  .outcome-box{margin-top:1rem;background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:14px 16px;display:flex;gap:24px;flex-wrap:wrap}
+  .out-item{display:flex;flex-direction:column;gap:2px}
+  .out-num{font-size:22px;font-weight:500;color:#1a1a18}
+  .out-label{font-size:12px;color:#6b6a63}
+
+  /* Notes section */
+  .notes-box{margin-top:1.5rem;background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:16px 18px}
+  .notes-title{font-size:14px;font-weight:500;margin-bottom:10px;color:#1a1a18}
+  .note-item{font-size:13px;color:#444;line-height:1.7;padding:5px 0;border-bottom:0.5px solid #eee}
+  .note-item:last-child{border-bottom:none}
+  .note-item span{font-weight:500;color:#1a1a18}
+
+  @media(max-width:540px){
+    .rm-phase{width:90px;padding:10px 10px}
+    .rm-phase-name{font-size:12px}
+    .section-title{font-size:18px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="section-title">Robotics Lab — Project Readiness Map</div>
+    <div class="sub">Dawah Public School Ladhoo, Pampore · Based on verified inventory (31/05/2024) + Extended Robotics Lab Plan</div>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab active" onclick="show('inventory',this)">Lab Inventory</button>
+    <button class="tab" onclick="show('projects',this)">Project Mapping</button>
+    <button class="tab" onclick="show('roadmap',this)">Learning Roadmap</button>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="panel active" id="panel-inventory">
+    <div class="legend-row">
+      <div class="leg"><div class="leg-dot" style="background:#1D9E75"></div>Received &amp; ready</div>
+      <div class="leg"><div class="leg-dot" style="background:#BA7517"></div>Partial / issue</div>
+      <div class="leg"><div class="leg-dot" style="background:#E24B4A"></div>Not received</div>
+    </div>
+    <div class="inv-grid" id="inv-grid"></div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="panel" id="panel-projects">
+    <div id="proj-panels"></div>
+    <div class="detail-area" id="detail-area">
+      <button class="detail-close" onclick="document.getElementById('detail-area').classList.remove('open')">✕</button>
+      <div class="detail-title" id="d-title"></div>
+      <div class="detail-row" id="d-kits"></div>
+      <div class="detail-row" id="d-skills"></div>
+      <div class="detail-row" id="d-outcome"></div>
+      <div class="detail-row" id="d-note"></div>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="panel" id="panel-roadmap">
+    <div class="roadmap" id="roadmap"></div>
+    <div class="outcome-box">
+      <div class="out-item"><span class="out-num">12</span><span class="out-label">Projects launchable now</span></div>
+      <div class="out-item"><span class="out-num">10</span><span class="out-label">Arduino/Robotics kits</span></div>
+      <div class="out-item"><span class="out-num">1</span><span class="out-label">3D Printer ready</span></div>
+      <div class="out-item"><span class="out-num">3+</span><span class="out-label">Purchases to unlock Phase 3</span></div>
+    </div>
+    <div class="notes-box">
+      <div class="notes-title">Key Recommendations</div>
+      <div class="note-item"><span>Start with Paper Circuits (Week 1):</span> All 15 kits let the whole class participate simultaneously — zero prerequisites, maximum engagement.</div>
+      <div class="note-item"><span>Use Humanoid Robot &amp; Tank as inspiration:</span> Demo these on Day 1 to show students what they're working toward, then have them program responses mid-program.</div>
+      <div class="note-item"><span>3D Printer = design thinking layer:</span> Use TinkerCAD (free) for design, print custom chassis and gripper parts. Turns building into real engineering.</div>
+      <div class="note-item"><span>Small purchases to unlock Phase 3:</span> ESP32 WiFi modules (~₹300 each), extra servo motors (~₹500 each), colour/material sensor (~₹400) open up IoT, robot arms, and trash sorting.</div>
+      <div class="note-item"><span>Follow up on undelivered items:</span> Tinker Orbits, Gear Box Kit, Discovering Motions Kit, and Soldering Box were paid for but not received. Soldering Box especially matters for permanent builds.</div>
+      <div class="note-item"><span>3D Pens — request replacement:</span> 9 of 10 are non-functional. Use the 1 working pen as a teacher demo while awaiting repair/replacement.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const inventory=[
+  {name:"Basic Electronics Kit",qty:10,status:"ok",note:"Breadboard, components — ready"},
+  {name:"STEAM Paper Circuit Kit",qty:15,status:"ok",note:"Low-voltage paper circuits — ready"},
+  {name:"Arduino / Robotics Starter Kit",qty:10,status:"ok",note:"10 units (8 original + 2 added)"},
+  {name:"Mechatron Kit",qty:10,status:"ok",note:"MECHATRONICS robotic kit, 6+ age"},
+  {name:"Sensor Box",qty:1,status:"ok",note:"Arduino-compatible sensors"},
+  {name:"Block Based Power Screw DIY Kit",qty:6,status:"ok",note:"Designing & assembly kit"},
+  {name:"Block Based Construction Kit – Logic Blocks",qty:8,status:"ok",note:"Logic & mechanical mix"},
+  {name:"STEM Circuit Kit",qty:6,status:"ok",note:"50+ DIY circuit experiments"},
+  {name:"Robotic Pick & Place Tank",qty:1,status:"ok",note:"4-motor tank robot — ready to use"},
+  {name:"Humanoid Robot",qty:1,status:"ok",note:"Voice, LED, RC — ready to use"},
+  {name:"Arctic 3D Printer",qty:1,status:"ok",note:"IoT-enabled FDM printer"},
+  {name:"Filament for 3D Printer",qty:5,status:"ok",note:"Ready for printing"},
+  {name:"Tinker N Design Kit (3D Pen)",qty:10,status:"partial",note:"9 of 10 pens not working — only 1 usable"},
+  {name:"Tinker Orbits",qty:8,status:"missing",note:"Not received by school"},
+  {name:"Block Based Gear Box Kit",qty:10,status:"missing",note:"Not received by school"},
+  {name:"Block Based Construction Kit – Discovering Motions",qty:10,status:"missing",note:"Not received by school"},
+  {name:"Soldering Box",qty:1,status:"missing",note:"Not received by school"},
+];
+
+const projects=[
+  {phase:"Starter (Week 1–2)",phaseClass:"ph-begin",items:[
+    {name:"Paper Circuit Art",status:"ready",kits:["STEAM Paper Circuit Kit","Basic Electronics Kit"],skills:"Circuits, conductivity, creativity",outcome:"Light-up greeting cards and artworks",note:"Perfect first session — zero prior knowledge needed. 15 kits = whole class at once."},
+    {name:"Electronics 101",status:"ready",kits:["Basic Electronics Kit","STEM Circuit Kit"],skills:"Series/parallel, LEDs, switches",outcome:"Working circuits on breadboard",note:"Foundation for everything else. 10+6 kits support large groups."},
+    {name:"Logic & Coding Unplugged",status:"ready",kits:["Block Based Construction Kit – Logic Blocks"],skills:"Algorithmic thinking, logic gates",outcome:"Physical logic puzzles solved",note:"No screen needed — great for building problem-solving mindset."},
+  ]},
+  {phase:"Phase 1 — Beginner (Month 1–2)",phaseClass:"ph-begin",items:[
+    {name:"Line Follower Robot",status:"ready",kits:["Arduino/Robotics Starter Kit","Sensor Box"],skills:"IR sensors, motor control, C++ basics",outcome:"Working robot follows tape track",note:"Classic crowd-pleaser. Run a track race between teams using 10 Arduino kits."},
+    {name:"Obstacle Avoiding Robot",status:"ready",kits:["Arduino/Robotics Starter Kit","Sensor Box"],skills:"Ultrasonic sensor, logic conditions",outcome:"Robot avoids walls autonomously",note:"Extend the line follower chassis — same hardware, new sensors."},
+    {name:"Mechatron Assembly Challenge",status:"ready",kits:["Mechatron Kit","Block Based Power Screw DIY Kit"],skills:"Mechanical assembly, gears, motors",outcome:"Team-built robot models",note:"Competition format works great — 10 kits = 10 teams."},
+    {name:"Pick & Place Tank Demo",status:"ready",kits:["Robotic Pick & Place Tank"],skills:"Robotic systems, control signals",outcome:"Students operate a real industrial-style bot",note:"Use as a demo/inspiration before students build their own."},
+    {name:"Gesture Controlled Robot",status:"ready",kits:["Arduino/Robotics Starter Kit","Sensor Box"],skills:"Accelerometer, wireless, calibration",outcome:"Robot mirrors hand movements",note:"High wow-factor for showcasing to parents and visitors."},
+    {name:"Smart Plant Watering",status:"ready",kits:["Arduino/Robotics Starter Kit","Sensor Box"],skills:"Automation, soil moisture sensing",outcome:"Self-watering plant system",note:"Real-world agriculture problem — great for innovation story."},
+  ]},
+  {phase:"Phase 2 — Intermediate (Month 3–5)",phaseClass:"ph-inter",items:[
+    {name:"3D Print Custom Robot Parts",status:"ready",kits:["Arctic 3D Printer","Filament for 3D Printer"],skills:"CAD basics, design thinking",outcome:"Custom-designed robot chassis/grippers",note:"Design in TinkerCAD (free), print on Arctic 3D Printer. Combines creativity with engineering."},
+    {name:"Humanoid Robot Showcase",status:"ready",kits:["Humanoid Robot"],skills:"Robotics programming, voice dialogue",outcome:"Interactive demo at school events",note:"Students program voice responses and LED expressions — great for public exhibitions."},
+    {name:"Bluetooth RC Robot",status:"ready",kits:["Arduino/Robotics Starter Kit"],skills:"Wireless comms, mobile app basics",outcome:"Phone-controlled robot",note:"Students can build their own controller app using MIT App Inventor (free)."},
+    {name:"RFID Security System",status:"ready",kits:["Arduino/Robotics Starter Kit","Sensor Box"],skills:"RFID, security systems, encryption basics",outcome:"Smart access control door",note:"Relatable real-world use case — school lockers, attendance system."},
+  ]},
+  {phase:"Phase 3 — Advanced (Month 6+)",phaseClass:"ph-adv",items:[
+    {name:"AI Smart Home (IoT)",status:"partial",kits:["Arduino/Robotics Starter Kit","Sensor Box"],skills:"IoT, WiFi, cloud dashboards",outcome:"Sensor-driven home automation",note:"Needs ESP32 WiFi module (~₹300 each). Arduino kits may already include one — verify."},
+    {name:"Mini Robot Arm",status:"partial",kits:["Arduino/Robotics Starter Kit","Mechatron Kit"],skills:"Servo control, kinematics, coding",outcome:"Programmable 3D-printed arm",note:"Needs additional servo motors (~₹500 each). Design arm parts on 3D printer."},
+    {name:"Trash Sorting Machine",status:"partial",kits:["Arduino/Robotics Starter Kit","Sensor Box","Mechatron Kit"],skills:"Sensor fusion, classification logic",outcome:"Automated recycling prototype",note:"Innovative real-world project. Needs colour/material sensor add-on (~₹400)."},
+  ]},
+  {phase:"Bonus / Innovation Sprints",phaseClass:"ph-bonus",items:[
+    {name:"3D Pen Prototype (1 kit)",status:"partial",kits:["Tinker N Design Kit"],skills:"3D spatial thinking, design",outcome:"Freehand 3D models",note:"Only 1 pen working. Best used for teacher demo or repair the others."},
+    {name:"School Science Fair Robots",status:"ready",kits:["All available kits"],skills:"End-to-end project lifecycle",outcome:"Display-ready innovation projects",note:"Combine kits creatively. Humanoid Robot + Line Follower + 3D-printed parts = impressive showcase."},
+  ]},
+];
+
+const roadmap=[
+  {phase:"Weeks 1–2",dur:"Spark",skills:["Paper circuits","Electronics basics","Unplugged coding","Team building"],highlight:[0,1]},
+  {phase:"Month 1–2",dur:"Beginner",skills:["Arduino","IR sensors","Ultrasonic","Motor control","Mechatronics","C++ basics"],highlight:[0,1,2,3]},
+  {phase:"Month 3–4",dur:"Intermediate",skills:["3D design","Bluetooth","RFID","CAD","Mobile apps","Humanoid bot"],highlight:[0,2,3]},
+  {phase:"Month 5–6",dur:"Advanced",skills:["IoT","WiFi","Servo kinematics","Sensor fusion","Automation"],highlight:[0,1,2]},
+  {phase:"Month 6+",dur:"Innovation",skills:["Science fair","Original projects","Prototype iteration","Real-world problems","Showcase"],highlight:[0,3,4]},
+];
+
+function renderInventory(){
+  const g=document.getElementById('inv-grid');
+  g.innerHTML=inventory.map(i=>`
+    <div class="inv-card ${i.status}">
+      <div class="inv-dot dot-${i.status=='ok'?'ok':i.status=='partial'?'part':'miss'}"></div>
+      <div>
+        <div class="inv-name">${i.name}</div>
+        <div class="inv-qty">Qty: ${i.qty}</div>
+        <div class="inv-status ${i.status=='ok'?'s-ok':i.status=='partial'?'s-part':'s-miss'}">${i.note}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderProjects(){
+  const c=document.getElementById('proj-panels');
+  let html='';
+  projects.forEach(ph=>{
+    html+=`<div class="phase-block"><span class="phase-label ${ph.phaseClass}">${ph.phase}</span><div class="proj-grid">`;
+    ph.items.forEach(p=>{
+      const pd=JSON.stringify(p).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+      html+=`<div class="proj-card ${p.status}" onclick='showDetail(${JSON.stringify(p)})'>
+        <div class="proj-head">
+          <div class="proj-name">${p.name}</div>
+          <div class="badge ${p.status=='ready'?'b-go':p.status=='partial'?'b-partial':'b-blocked'}">${p.status=='ready'?'Ready now':p.status=='partial'?'Almost ready':'Needs items'}</div>
+        </div>
+        <div class="kits-used">${p.kits.map(k=>`<span class="kit-tag">${k}</span>`).join('')}</div>
+        <div class="proj-note">${p.skills}</div>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  c.innerHTML=html;
+}
+
+function showDetail(p){
+  const da=document.getElementById('detail-area');
+  document.getElementById('d-title').textContent=p.name;
+  document.getElementById('d-kits').innerHTML=`<strong>Kits used:</strong> ${p.kits.join(' · ')}`;
+  document.getElementById('d-skills').innerHTML=`<strong>Skills built:</strong> ${p.skills}`;
+  document.getElementById('d-outcome').innerHTML=`<strong>Outcome:</strong> ${p.outcome}`;
+  document.getElementById('d-note').innerHTML=`<strong>Teaching tip:</strong> ${p.note}`;
+  da.classList.add('open');
+  da.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderRoadmap(){
+  const r=document.getElementById('roadmap');
+  r.innerHTML=roadmap.map(row=>`
+    <div class="rm-row">
+      <div class="rm-phase">
+        <div class="rm-phase-name">${row.phase}</div>
+        <div class="rm-phase-dur">${row.dur}</div>
+      </div>
+      <div class="rm-skills">
+        ${row.skills.map((s,i)=>`<span class="skill-pill ${row.highlight.includes(i)?'highlight':''}">${s}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function show(tab,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+renderInventory();
+renderProjects();
+renderRoadmap();
+</script>
+</body>
+</html>
